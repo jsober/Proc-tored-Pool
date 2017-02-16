@@ -1,4 +1,5 @@
 package Proc::tored::Pool::Constants;
+# ABSTRACT: Constants used by Proc::tored::Pool
 
 use strict;
 use warnings;

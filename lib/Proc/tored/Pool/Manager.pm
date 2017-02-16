@@ -1,4 +1,5 @@
 package Proc::tored::Pool::Manager;
+# ABSTRACT: OO interface to creating a managed worker pool service
 
 use strict;
 use warnings;

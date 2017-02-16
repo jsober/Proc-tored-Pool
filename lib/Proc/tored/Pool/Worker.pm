@@ -1,4 +1,5 @@
 package Proc::tored::Pool::Worker;
+# ABSTRACT: executes a single code block
 
 use strict;
 use warnings;

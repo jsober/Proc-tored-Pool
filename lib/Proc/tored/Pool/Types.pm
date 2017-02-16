@@ -1,4 +1,5 @@
 package Proc::tored::Pool::Types;
+# ABSTRACT: Type constraints used by Proc::tored::Pool
 
 use strict;
 use warnings;
