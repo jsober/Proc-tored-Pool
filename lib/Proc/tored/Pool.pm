@@ -7,6 +7,25 @@ Proc::tored::Pool
 
 =head1 SYNOPSIS
 
+  use Proc::tored::Pool;
+
+  # Create a worker pool service
+  my $pool = pool 'thing-doer', in '/var/run', capacity 10,
+    on success, call {
+      my ($me, $id, @results) = @_;
+      print "thing $id complete: @results";
+    },
+    on failure, call {
+      my ($me, $id, $message) = @_;
+      warn "thing $id failed: $message";
+    };
+
+  # Do things with the pool
+  run {
+    my ($thing_id, $thing) = get_next_thing();
+    process { do_things($thing) } $pool, $thing_id;
+  } $pool;
+
 =head1 DESCRIPTION
 
 =cut
@@ -27,7 +46,7 @@ our @EXPORT = (
     success
     failure
     pool
-    hire
+    capacity
     on
     call
     pending

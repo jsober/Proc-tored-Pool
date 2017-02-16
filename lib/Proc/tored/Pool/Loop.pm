@@ -73,10 +73,19 @@ sub _build_forkmgr {
   $pm->run_on_finish(sub {
     my ($pid, $code, $ident, $signal, $core, $data) = @_;
     --$self->{pending};
+
     if ($code == 0) {
-      $self->trigger(success, $ident, @$data);
-    } else {
-      $self->trigger(failure, $code, $signal);
+      my ($success, @results) = @$data;
+
+      if ($success) {
+        $self->trigger(success, $ident, @results);
+      }
+      else {
+        $self->trigger(failure, $ident, @results);
+      }
+    }
+    else {
+      $self->trigger(failure, $ident, "task died with exit code $code (signal $signal)");
     }
   });
 
@@ -91,7 +100,7 @@ after service => sub {
 sub assign {
   my $self = shift;
   my $code = shift;
-  push @_, sub {[Proc::tored::Pool::Worker->work($code)]};
+  push @_, sub { Proc::tored::Pool::Worker->work($code) };
   $self->forkmgr->wait_for_available_procs(1);
   $self->forkmgr->start_child(@_);
   $self->forkmgr->wait_children; # triggers pending callbacks w/o blocking

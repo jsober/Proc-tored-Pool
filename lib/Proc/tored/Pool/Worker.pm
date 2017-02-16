@@ -3,20 +3,17 @@ package Proc::tored::Pool::Worker;
 use strict;
 use warnings;
 use Moo;
+use Try::Tiny;
 
 with 'Proc::tored::Role::Running';
 
 sub work {
   my ($class, $code) = @_;
-
   my $self = $class->new;
   $self->start;
-
-  if ($self->is_running) {
-    return $code->(@_);
-  }
-
-  return;
+  return unless $self->is_running;
+  try { [1, $code->(@_)] }
+  catch { [0, $_] };
 }
 
 1;
