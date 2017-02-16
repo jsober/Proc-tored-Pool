@@ -1,9 +1,5 @@
 package Proc::tored::Pool;
-# ABSTRACT: Managed worker pool with Proc::tored and Parallel::ForkManager
-
-=head1 NAME
-
-Proc::tored::Pool
+# ABSTRACT: managed work pool with Proc::tored and Parallel::ForkManager
 
 =head1 SYNOPSIS
 
@@ -27,6 +23,9 @@ Proc::tored::Pool
   } $pool;
 
 =head1 DESCRIPTION
+
+Provides a simple and fast interfact to build and manage a pool of forked
+worker processes. The process is controlled using a pidfile and POSIX signals.
 
 =cut
 
@@ -67,6 +66,10 @@ our @EXPORT = (
 =head2 pending
 
 =head2 process
+
+=head1 SEE ALSO
+
+L<Proc::tored>, L<Parallel::ForkManager>
 
 =cut
 

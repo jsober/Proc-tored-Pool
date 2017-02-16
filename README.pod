@@ -1,12 +1,40 @@
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
-Proc::tored::Pool
+Proc::tored::Pool - managed work pool with Proc::tored and Parallel::ForkManager
+
+=head1 VERSION
+
+version 0.01
 
 =head1 SYNOPSIS
 
+  use Proc::tored::Pool;
+
+  # Create a worker pool service
+  my $pool = pool 'thing-doer', in '/var/run', capacity 10,
+    on success, call {
+      my ($me, $id, @results) = @_;
+      print "thing $id complete: @results";
+    },
+    on failure, call {
+      my ($me, $id, $message) = @_;
+      warn "thing $id failed: $message";
+    };
+
+  # Do things with the pool
+  run {
+    my ($thing_id, $thing) = get_next_thing();
+    process { do_things($thing) } $pool, $thing_id;
+  } $pool;
+
 =head1 DESCRIPTION
+
+Provides a simple and fast interfact to build and manage a pool of forked
+worker processes. The process is controlled using a pidfile and POSIX signals.
 
 =head1 EXPORTED SUBROUTINES
 
@@ -21,5 +49,20 @@ Proc::tored::Pool
 =head2 pending
 
 =head2 process
+
+=head1 SEE ALSO
+
+L<Proc::tored>, L<Parallel::ForkManager>
+
+=head1 AUTHOR
+
+Jeff Ober <jeffober@gmail.com>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2017 by Jeff Ober.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut
