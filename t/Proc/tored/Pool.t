@@ -17,12 +17,31 @@ my $pool = pool $name, in $dir, capacity 1,
 
 ok $pool, 'build';
 
-my $sent = process { 'foo' } $pool, 'id-foo';
-ok $sent, 'process';
-sync $pool;
+subtest 'positive path' => sub {
+  undef $assignment;
+  undef $success;
+  undef $failure;
 
-is $assignment, [$pool, 'id-foo'], 'assignment';
-is $success, [$pool, 'id-foo', 'foo'], 'success';
-is $failure, undef, 'failure';
+  my $sent = process { 'foo' } $pool, 'id-foo';
+  ok $sent, 'process';
+  sync $pool;
+
+  is $assignment, [$pool, 'id-foo'], 'assignment';
+  is $success, [$pool, 'id-foo', 'foo'], 'success';
+  is $failure, undef, 'failure';
+};
+
+subtest 'failure' => sub {
+  undef $assignment;
+  undef $success;
+  undef $failure;
+
+  process { die 'bar' } $pool, 'id-bar';
+  sync $pool;
+
+  is $assignment, [$pool, 'id-bar'], 'assignment';
+  is $success, undef, 'success';
+  like $failure, [$pool, 'id-bar', qr/bar/], 'failure';
+};
 
 done_testing;
