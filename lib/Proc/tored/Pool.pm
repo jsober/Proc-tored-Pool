@@ -99,6 +99,16 @@ passed as is to the L</success> callback (if supplied).
   process { seize_the_means_of_production() } $pool;
   process { seize_the_means_of_production() } $pool, $task_id;
 
+=head2 sync
+
+For situations in which a task or tasks must be completed before program
+execution can continue, C<sync> may be used to block until all pending tasks
+have completed. After calling sync, there will be no pending tasks and all
+callbacks for previously submitted tasks will have been called.
+
+  process { seize_the_means_of_production() } $pool;
+  sync $pool;
+
 =head1 EVENTS
 
 =head2 assignment
@@ -154,5 +164,6 @@ sub on       ($@)   { 'on_' . shift, @_ }
 sub call     (&@)   { @_ }
 sub pending  ($)    { $_[0]->pending }
 sub process  (&$;$) { $_[1]->assign($_[0], $_[2]) };
+sub sync     ($)    { $_[0]->sync }
 
 1;
