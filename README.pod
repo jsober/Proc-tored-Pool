@@ -1,0 +1,25 @@
+=pod
+
+=head1 NAME
+
+Proc::tored::Pool
+
+=head1 SYNOPSIS
+
+=head1 DESCRIPTION
+
+=head1 EXPORTED SUBROUTINES
+
+=head2 pool
+
+=head2 capacity
+
+=head2 on
+
+=head2 call
+
+=head2 pending
+
+=head2 process
+
+=cut
