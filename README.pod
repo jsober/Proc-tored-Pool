@@ -45,7 +45,7 @@ In addition, the following subroutines are exported by default.
 
 =head2 pool
 
-Creates the pool (an instance of L<Proc::tored::Pool::Loop>). Requires a
+Creates the pool (an instance of L<Proc::tored::Pool::Manager>). Requires a
 C<$name> as its first argument.
 
   my $pool = pool 'the-proletariat', ...;

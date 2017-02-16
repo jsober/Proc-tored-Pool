@@ -1,4 +1,4 @@
-package Proc::tored::Pool::Loop;
+package Proc::tored::Pool::Manager;
 
 use strict;
 use warnings;
@@ -92,11 +92,6 @@ sub _build_forkmgr {
   return $pm;
 }
 
-after service => sub {
-  my $self = shift;
-  $self->forkmgr->wait_all_children;
-};
-
 sub assign {
   my $self = shift;
   my $code = shift;
@@ -106,5 +101,12 @@ sub assign {
   $self->forkmgr->wait_children; # triggers pending callbacks w/o blocking
   return 1;
 }
+
+sub sync {
+  my $self = shift;
+  $self->forkmgr->wait_all_children;
+}
+
+after service => sub { shift->sync };
 
 1;

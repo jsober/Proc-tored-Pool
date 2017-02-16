@@ -33,7 +33,7 @@ use strict;
 use warnings;
 require Exporter;
 use Proc::tored::Pool::Constants ':events';
-use Proc::tored::Pool::Loop;
+use Proc::tored::Pool::Manager;
 use Proc::tored;
 
 use parent 'Exporter';
@@ -62,7 +62,7 @@ In addition, the following subroutines are exported by default.
 
 =head2 pool
 
-Creates the pool (an instance of L<Proc::tored::Pool::Loop>). Requires a
+Creates the pool (an instance of L<Proc::tored::Pool::Manager>). Requires a
 C<$name> as its first argument.
 
   my $pool = pool 'the-proletariat', ...;
@@ -148,7 +148,7 @@ L<Proc::tored>, L<Parallel::ForkManager>
 
 =cut
 
-sub pool     ($%)   { Proc::tored::Pool::Loop->new(name => shift, @_); }
+sub pool     ($%)   { Proc::tored::Pool::Manager->new(name => shift, @_); }
 sub capacity ($@)   { workers => shift, @_ }
 sub on       ($@)   { 'on_' . shift, @_ }
 sub call     (&@)   { @_ }
