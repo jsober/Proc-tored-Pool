@@ -1,6 +1,44 @@
 package Proc::tored::Pool::Manager;
 # ABSTRACT: OO interface to creating a managed worker pool service
 
+=head1 SYNOPSIS
+
+  use Proc::tored::Pool::Manager;
+
+  my $manager = Proc::tored::Pool::Manager->new(
+    name => 'thing-doer',
+    dir => '/var/run',
+    workers => 8,
+    on_assignment => sub {
+      my ($self, $id) = @_;
+      ...
+    },
+    on_success => sub {
+      my ($self, $id, @results) = @_;
+      ...
+    },
+    on_failure => sub {
+      my ($self, $id, $error) = @_;
+      ...
+    },
+  );
+
+  # Submit tasks to the pool
+  $manager->service(sub {
+    my ($thing_id, $thing) = next_thing();
+    $manager->assign(sub { do_stuff_with($thing) }, $thing_id);
+  });
+
+  # Wait for all pending tasks to complete
+  $manager->sync;
+
+=head1 DESCRIPTION
+
+The C<Manager> is the object created L<Proc::tored::Pool/pool>. It extends
+L<Proc::tored::Manager>.
+
+=cut
+
 use strict;
 use warnings;
 
@@ -17,26 +55,66 @@ use Proc::tored::Pool::Worker;
 
 extends 'Proc::tored::Manager';
 
+=head1 ATTRIBUTES
+
+=head2 workers
+
+Specifies the size of the pool of forked processes. Processes are forked as
+needed and used only once.
+
+=cut
+
 has workers => (
   is  => 'ro',
   isa => PosInt,
   required => 1,
 );
 
+=head2 on_assignment
+
+A code ref that is called when a task has been submitted to the worker pool.
+Receives the manager instance and the task id if submitted.
+to L</assign>.
+
+=cut
+
 has on_assignment => (
   is  => 'ro',
   isa => Maybe[CodeRef],
 );
+
+=head2 on_success
+
+A code ref that is triggered when a task's result has been collected. Receives
+the manager instance, the task id (if submitted), and any return value(s) from
+the submitted code block.
+
+=cut
 
 has on_success => (
   is  => 'ro',
   isa => Maybe[CodeRef],
 );
 
+=head2 on_failure
+
+A code ref that is triggered when a task died during execution or exited
+abnormally. Receives the manager instance, the task id (if submitted), and the
+error message.
+
+=cut
+
 has on_failure => (
   is  => 'ro',
   isa => Maybe[CodeRef],
 );
+
+=head2 pending
+
+Returns the number of tasks that have been submitted but whose results have not
+yet been collected.
+
+=cut
 
 has pending => (
   is  => 'ro',
@@ -93,6 +171,13 @@ sub _build_forkmgr {
   return $pm;
 }
 
+=head2 assign
+
+Submits a task (a C<CODE> ref) to the worker pool, optionally accepting a task
+id (something string-like).
+
+=cut
+
 sub assign {
   my $self = shift;
   my $code = shift;
@@ -102,6 +187,13 @@ sub assign {
   $self->forkmgr->wait_children; # triggers pending callbacks w/o blocking
   return 1;
 }
+
+=head2 sync
+
+Blocks until all submitted tasks have completed and their results have been
+collected.
+
+=cut
 
 sub sync {
   my $self = shift;

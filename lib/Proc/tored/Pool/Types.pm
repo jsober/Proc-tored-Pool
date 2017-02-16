@@ -15,9 +15,30 @@ use Type::Library -base,
     Event
   );
 
+=head1 TYPES
+
+=head2 NonEmptyStr
+
+A C<Str> that contains at least one non-whitespace character.
+
+=head2 Dir
+
+A L</NonEmptyStr> that is a valid directory path.
+
+=head2 PosInt
+
+An C<Int> with a positive value.
+
+=head2 Event
+
+One of L<Proc::tored::Pool::Constants/assignment>,
+L<Proc::tored::Pool::Constants/success>, or
+L<Proc::tored::Pool::Constants/failure>.
+
+=cut
+
 declare NonEmptyStr, as Str, where { $_ =~ /\S/ };
 declare Dir, as NonEmptyStr, where { -d $_ };
-declare Task, as Tuple[NonEmptyStr, CodeRef];
 declare PosInt, as Int, where { $_ > 0 };
 declare Event, as Enum[assignment, success, failure];
 

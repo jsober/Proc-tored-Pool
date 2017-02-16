@@ -22,6 +22,9 @@ package Proc::tored::Pool;
     process { do_things($thing) } $pool, $thing_id;
   } $pool;
 
+  # Control the pool as a Proc::tored service
+  zap $pool, 15 or die "timed out after 15 seconds waiting for pool to stop";
+
 =head1 DESCRIPTION
 
 Provides a simple and fast interfact to build and manage a pool of forked
@@ -92,7 +95,7 @@ have not yet completed.
 
 =head2 process
 
-Sends a task (a C<CODEREF>) to the pool, optionally specifying a task id to
+Sends a task (a C<CODE> ref) to the pool, optionally specifying a task id to
 identify the results in callbacks. The return value of the supplied code ref is
 passed as is to the L</success> callback (if supplied).
 
