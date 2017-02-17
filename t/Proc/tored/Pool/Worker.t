@@ -1,10 +1,13 @@
 use Test2::Bundle::Extended -target => 'Proc::tored::Pool::Worker';
+use Path::Tiny;
 
-ok my $worker = $CLASS->new, 'new';
-is $worker->work(sub { 'foo' }), [1, 'foo'], 'success -wantarray';
-is $worker->work(sub { ('foo', 'bar') }), [1, 'foo', 'bar'], 'success +wantarray';
-like $worker->work(sub { die 'error!' }), [0, qr/error!/], 'failure';
+my $dir = Path::Tiny->tempdir('temp.XXXXXX', CLEANUP => 1, EXLOCK => 0);
+skip_all 'could not create writable temp directory' unless -w $dir;
+my $term_file = $dir->child("term_file_$$.term");
+my @args = (term_file => "$term_file");
 
-undef $worker;
+is $CLASS->work(sub { 'foo' }, @args), [1, 'foo'], 'success -wantarray';
+is $CLASS->work(sub { ('foo', 'bar') }, @args), [1, 'foo', 'bar'], 'success +wantarray';
+like $CLASS->work(sub { die 'error!' }, @args), [0, qr/error!/], 'failure';
 
 done_testing;

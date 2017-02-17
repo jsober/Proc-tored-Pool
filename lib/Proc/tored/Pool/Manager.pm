@@ -184,7 +184,7 @@ sub assign {
 
   push @_, sub {
     require Proc::tored::Pool::Worker;
-    Proc::tored::Pool::Worker->work($code);
+    Proc::tored::Pool::Worker->work($code, term_file => $self->term_file);
   };
 
   $self->forkmgr->wait_for_available_procs(1);

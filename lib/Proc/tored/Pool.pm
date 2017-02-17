@@ -28,7 +28,7 @@ package Proc::tored::Pool;
 =head1 DESCRIPTION
 
 Provides a simple and fast interfact to build and manage a pool of forked
-worker processes. The process is controlled using a pidfile and POSIX signals.
+worker processes. The process is controlled using a pidfile and touch file.
 
 =cut
 

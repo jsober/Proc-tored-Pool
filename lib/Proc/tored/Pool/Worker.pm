@@ -25,8 +25,8 @@ value followed by the error thrown.
 =cut
 
 sub work {
-  my ($class, $code) = @_;
-  my $self = $class->new;
+  my ($class, $code, @args) = @_;
+  my $self = $class->new(@args);
   $self->start;
   return unless $self->is_running;
   try { [1, $code->(@_)] }
