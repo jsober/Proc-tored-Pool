@@ -2,7 +2,8 @@ Proc::tored::Pool change log
 
 {{$NEXT}}
 
-- Required Parallel::ForkManager to 1.19 due to use of 'start_child' method
+- Parallel::ForkManager to 1.19 due to use of 'start_child' method
+- Proc::tored to 0.06 for updated process management
 - Ensure Worker class is loaded in child process
 
 0.01 2017-02-16
