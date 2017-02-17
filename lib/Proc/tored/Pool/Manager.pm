@@ -181,7 +181,12 @@ id (something string-like).
 sub assign {
   my $self = shift;
   my $code = shift;
-  push @_, sub { Proc::tored::Pool::Worker->work($code) };
+
+  push @_, sub {
+    require Proc::tored::Pool::Worker;
+    Proc::tored::Pool::Worker->work($code);
+  };
+
   $self->forkmgr->wait_for_available_procs(1);
   $self->forkmgr->start_child(@_);
   $self->forkmgr->wait_children; # triggers pending callbacks w/o blocking
