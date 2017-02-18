@@ -173,7 +173,14 @@ sub capacity ($@)   { workers => shift, @_ }
 sub on       ($@)   { 'on_' . shift, @_ }
 sub call     (&@)   { @_ }
 sub pending  ($)    { $_[0]->pending }
-sub process  (&$;$) { $_[1]->assign($_[0], $_[2]) };
 sub sync     ($)    { $_[0]->sync }
+#sub process  (&$;$) { $_[1]->assign($_[0], $_[2]) };
+
+sub process (&$;$) {
+  my $code = shift;
+  my $pool = shift;
+  unshift @_, $code;
+  $pool->assign(@_);
+}
 
 1;

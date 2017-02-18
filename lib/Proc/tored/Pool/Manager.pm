@@ -51,7 +51,6 @@ use Time::HiRes 'sleep';
 use Parallel::ForkManager;
 use Proc::tored::Pool::Constants ':events';
 use Proc::tored::Pool::Types -types;
-use Proc::tored::Pool::Worker;
 
 extends 'Proc::tored::Manager';
 
@@ -183,8 +182,8 @@ sub assign {
   my $code = shift;
 
   push @_, sub {
-    require Proc::tored::Pool::Worker;
-    Proc::tored::Pool::Worker->work($code, term_file => $self->term_file);
+    try   { [1, $code->(@_)] }
+    catch { [0, $_] };
   };
 
   $self->forkmgr->wait_for_available_procs(1);
