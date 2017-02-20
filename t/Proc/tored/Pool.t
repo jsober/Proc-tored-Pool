@@ -6,74 +6,68 @@ my $name = 'proc-tored-pool-test';
 my $dir = Path::Tiny->tempdir('temp.XXXXXX', CLEANUP => 1, EXLOCK => 0);
 skip_all 'could not create writable temp directory' unless -w $dir;
 
-my $assignment;
-my $success;
-my $failure;
+my $a_args; my $a_count = 0;
+my $s_args; my $s_count = 0;
+my $f_args; my $f_count = 0;
 
-my $pool = pool $name, in $dir, capacity 1,
-  on assignment, call { $assignment = [@_] },
-  on success, call { $success = [@_] },
-  on failure, call { $failure = [@_] };
+sub reset_vars {
+  undef $a_args;
+  undef $s_args;
+  undef $f_args;
+  $a_count = 0;
+  $s_count = 0;
+  $f_count = 0;
+}
+
+my $pool = pool $name, in "$dir", capacity 4,
+  on assignment, call { $a_args = [@_]; ++$a_count; },
+  on success, call { $s_args = [@_]; ++$s_count; },
+  on failure, call { $f_args = [@_]; ++$f_count; };
 
 ok $pool, 'build';
 
 subtest 'positive path' => sub {
-  undef $assignment;
-  undef $success;
-  undef $failure;
+  reset_vars();
 
   my $sent = process { 'foo' } $pool, 'id-foo';
   ok $sent, 'process';
   sync $pool;
 
-  is $assignment, [$pool, 'id-foo'], 'assignment';
-  is $success, [$pool, 'id-foo', 'foo'], 'success';
-  is $failure, undef, 'failure';
+  is $a_args, [$pool, 'id-foo'], 'assignment';
+  is $s_args, [$pool, 'id-foo', 'foo'], 'success';
+  is $f_args, undef, 'failure';
 };
 
 subtest 'failure' => sub {
-  undef $assignment;
-  undef $success;
-  undef $failure;
+  reset_vars();
 
   process { die 'bar' } $pool, 'id-bar';
   sync $pool;
 
-  is $assignment, [$pool, 'id-bar'], 'assignment';
-  is $success, undef, 'success';
-  like $failure, [$pool, 'id-bar', qr/bar/], 'failure';
+  is $a_args, [$pool, 'id-bar'], 'assignment';
+  is $s_args, undef, 'success';
+  like $f_args, [$pool, 'id-bar', qr/bar/], 'failure';
 };
 
 subtest 'run' => sub {
-  my $assignment = 0;
-  my $success = 0;
-  my $failure = 0;
-  my $zapped;
-  my $i = 0;
+  reset_vars();
 
-  my $pool = pool $name, in $dir, capacity 4,
-    on assignment, call { ++$assignment },
-    on success, call { ++$success },
-    on failure, call { ++$failure };
+  my $i = 0;
 
   run {
     if (++$i == 10) {
-      zap $pool, 5, 1;
-    }
-    elsif ($i == 20) {
-      stop $pool; # backstop
+      stop $pool;
     }
 
     process { $i * 2 } $pool;
     return $i;
   } $pool;
 
-  ok !$zapped, 'zapped';
   ok !(running $pool), '!is_running';
   is $i, 10, 'expected work completed';
-  is $assignment, 10, 'assignment';
-  is $success, 10, 'success';
-  is $failure, 0, 'failure';
+  is $a_count, 10, 'assignment';
+  is $s_count, 10, 'success';
+  is $f_count, 0, 'failure';
 };
 
 done_testing;

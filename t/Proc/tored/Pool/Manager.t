@@ -11,8 +11,8 @@ my $failure;
 
 my $mgr = $CLASS->new(
   name => $name,
-  dir => $dir,
-  workers => 1,
+  dir => "$dir",
+  workers => 2,
   on_assignment => sub { $assignment = [@_] },
   on_success => sub { $success = [@_] },
   on_failure => sub { $failure = [@_] },

@@ -8,7 +8,7 @@ Proc::tored::Pool - managed work pool with Proc::tored and Parallel::ForkManager
 
 =head1 VERSION
 
-version 0.02
+version 0.03
 
 =head1 SYNOPSIS
 
@@ -146,7 +146,13 @@ LIMITATIONS> and L<Parallel::ForkManager/SECURITY> for details.
 
 =head1 SEE ALSO
 
-L<Proc::tored>, L<Parallel::ForkManager>
+=over
+
+=item L<Proc::tored>
+
+=item L<Parallel::ForkManager>
+
+=back
 
 =head1 AUTHOR
 
