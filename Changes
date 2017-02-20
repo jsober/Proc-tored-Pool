@@ -1,4 +1,6 @@
 {{$NEXT}}
+- Update with API changes in Proc::tored 0.08
+- Better, faster tests
 
 0.02 2017-02-18
 

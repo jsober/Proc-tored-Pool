@@ -27,6 +27,7 @@ package Proc::tored::Pool;
   resume $pool;
   stop $pool;
   zap $pool, 15 or die "timed out after 15 seconds waiting for pool to stop";
+  start $pool;
 
 =head1 DESCRIPTION
 
