@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+0.04 2017-02-21
 - Fixed bug in which data ref from ForkManager was not checked before deref
 
 0.03 2017-02-20
