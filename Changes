@@ -1,4 +1,5 @@
 {{$NEXT}}
+- Fixed bug in which data ref from ForkManager was not checked before deref
 
 0.03 2017-02-20
 - Update with API changes in Proc::tored 0.08

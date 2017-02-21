@@ -153,13 +153,17 @@ sub _build_forkmgr {
     --$self->{pending};
 
     if ($code == 0) {
-      my ($success, @results) = @$data;
-
-      if ($success) {
-        $self->trigger(success, $ident, @results);
+      if ($data) {
+        my ($success, @results) = @$data;
+        if ($success) {
+          $self->trigger(success, $ident, @results);
+        }
+        else {
+          $self->trigger(failure, $ident, @results);
+        }
       }
       else {
-        $self->trigger(failure, $ident, @results);
+        $self->trigger(failure, $ident, 'task did not return any data');
       }
     }
     else {
