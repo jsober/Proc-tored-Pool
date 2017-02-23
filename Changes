@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+0.05 2017-02-23
 - Tasks that exec() now supported, callback result is 'zero but true'
 
 0.04 2017-02-21
