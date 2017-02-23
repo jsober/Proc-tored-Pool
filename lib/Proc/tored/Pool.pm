@@ -138,12 +138,17 @@ provided when calling L</pool>), and the return value of the code block.
 
   my $pool = pool 'thing-doer', ...,
     on success, call {
-      my ($self, $task_id, @result) = @_;
+      my ($self, $task_id, @results) = @_;
       ...
     };
 
   process { do_things() } $pool, $task_id;
 
+If L</process> performs an C<exec>, no data is returned from the worker process
+(because C<exec> never returns). In this case, if the process had a zero exit
+status, the C<success> callback is triggered with the results value of C<"zero
+but true">. A non-zero exit status is handled by C<failure> as in the general
+case.
 
 =head2 failure
 

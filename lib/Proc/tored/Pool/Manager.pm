@@ -86,7 +86,32 @@ has on_assignment => (
 
 A code ref that is triggered when a task's result has been collected. Receives
 the manager instance, the task id (if submitted), and any return value(s) from
-the submitted code block.
+the submitted code block. If no values were returned from the code block, the
+results will be an empty list.
+
+  Proc::tored::Manager->new(
+    ...
+    on_success => sub {
+      my ($me, $id, @results) = @_;
+      if (@results) {
+        ...
+      }
+    },
+  );
+
+If the code ref passed to L</assign> performs an C<exec>, the results array
+will be replaced with zero-but-true when the worker process exits with a zero
+exit status. This is to (attempt to) avoid confusion in code where an assigned
+task may or may not C<exec>.
+
+  on_success => sub {
+    my ($me, $id, @results) = @_;
+
+    # Task exited cleanly but without a return value
+    if (@results == 1 && $results->[0]) {
+      ...
+    }
+  }
 
 =cut
 
@@ -152,7 +177,9 @@ sub _build_forkmgr {
     my ($pid, $code, $ident, $signal, $core, $data) = @_;
     --$self->{pending};
 
+    # Task completed successfully
     if ($code == 0) {
+      # Task returned data
       if ($data) {
         my ($success, @results) = @$data;
         if ($success) {
@@ -162,12 +189,13 @@ sub _build_forkmgr {
           $self->trigger(failure, $ident, @results);
         }
       }
+      # No data was returned - likely the result of an exec
       else {
-        $self->trigger(failure, $ident, 'task did not return any data');
+        $self->trigger(success, $ident, '0 but true');
       }
     }
     else {
-      $self->trigger(failure, $ident, "task died with exit code $code (signal $signal)");
+      $self->trigger(failure, $ident, "worker terminated with exit code $code (signal $signal)");
     }
   });
 

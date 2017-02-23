@@ -1,4 +1,5 @@
 {{$NEXT}}
+- Tasks that exec() now supported, callback result is 'zero but true'
 
 0.04 2017-02-21
 - Fixed bug in which data ref from ForkManager was not checked before deref

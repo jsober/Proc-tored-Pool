@@ -8,20 +8,31 @@ skip_all 'could not create writable temp directory' unless -w $dir;
 my $assignment;
 my $success;
 my $failure;
+my $mgr;
 
-my $mgr = $CLASS->new(
-  name => $name,
-  dir => "$dir",
-  workers => 2,
-  on_assignment => sub { $assignment = [@_] },
-  on_success => sub { $success = [@_] },
-  on_failure => sub { $failure = [@_] },
-);
-
-subtest 'positive path' => sub {
+sub reset_vars {
   undef $assignment;
   undef $success;
   undef $failure;
+
+  $mgr = $CLASS->new(
+    name => $name,
+    dir => "$dir",
+    workers => 2,
+    on_assignment => sub { $assignment = [@_] },
+    on_success => sub { $success = [@_] },
+    on_failure => sub { $failure = [@_] },
+  );
+
+  $mgr->clear_flags;
+
+  ok $mgr, 'manager';
+  ok !$mgr->is_running, 'not running';
+  is $mgr->pending, 0, 'no pending tasks';
+};
+
+subtest 'positive path' => sub {
+  reset_vars();
   ok $mgr->assign(sub { 'foo' }, 'id-foo'), 'assign';
   $mgr->sync;
   is $assignment, [$mgr, 'id-foo'], 'assigned';
@@ -30,9 +41,7 @@ subtest 'positive path' => sub {
 };
 
 subtest 'wantarray' => sub {
-  undef $assignment;
-  undef $success;
-  undef $failure;
+  reset_vars();
   ok $mgr->assign(sub { ('foo', 'bar') }, 'id-foo'), 'assign';
   $mgr->sync;
   is $assignment, [$mgr, 'id-foo'], 'assigned';
@@ -41,9 +50,7 @@ subtest 'wantarray' => sub {
 };
 
 subtest 'failure' => sub {
-  undef $assignment;
-  undef $success;
-  undef $failure;
+  reset_vars();
   ok $mgr->assign(sub { die 'bar' }, 'id-foo'), 'assign';
   $mgr->sync;
   is $assignment, [$mgr, 'id-foo'], 'assigned';
@@ -52,9 +59,7 @@ subtest 'failure' => sub {
 };
 
 subtest 'no id' => sub {
-  undef $assignment;
-  undef $success;
-  undef $failure;
+  reset_vars();
   ok $mgr->assign(sub { 'foo' }), 'assign';
   $mgr->sync;
   is $assignment, [$mgr, undef], 'assigned';
@@ -66,9 +71,7 @@ subtest 'no id' => sub {
 };
 
 subtest 'service' => sub {
-  undef $assignment;
-  undef $success;
-  undef $failure;
+  reset_vars();
   my $i = 0;
 
   $mgr->service(sub {
@@ -78,12 +81,33 @@ subtest 'service' => sub {
       die 'backstop';
     }
 
-    $mgr->assign(sub { ($i, $i * 2) });
+    $mgr->assign(sub { ($i, $i * 2) }, $i);
     return $i;
   });
 
+  $mgr->sync;
+
   ok !$mgr->is_running, '!is_running';
+  ok $mgr->is_stopped, 'is_stopped';
   is $i, 10, 'expected work completed';
+};
+
+subtest 'fork/exec' => sub {
+  reset_vars();
+
+  $mgr->service(sub {
+    $mgr->assign(sub { exec q{perl -e '1'} }, 'id_exec');
+    return 0;
+  });
+
+  $mgr->sync;
+
+  ok !$mgr->is_running, '!is_running';
+  is $assignment, [$mgr, 'id_exec'], 'assigned';
+  is $success, [$mgr, 'id_exec', '0 but true'], 'success';
+  is $failure, undef, 'failure';
+  ok $success->[2], 'result is true';
+  ok $success->[2] == 0, 'result == 0';
 };
 
 done_testing;
