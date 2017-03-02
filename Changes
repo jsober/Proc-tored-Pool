@@ -1,4 +1,6 @@
 {{$NEXT}}
+- Bump minimum version of Proc::tored to 0.11 to fix test failures as a result
+  of using older versions
 
 0.05 2017-02-23
 - Tasks that exec() now supported, callback result is 'zero but true'
