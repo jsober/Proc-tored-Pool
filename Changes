@@ -1,5 +1,5 @@
 {{$NEXT}}
-- Bump Proc::tored to 0.11 to address test failures caused by some older
+- Bump Proc::tored to 0.12 to address test failures caused by some older
   versions
 
 0.05 2017-02-23
