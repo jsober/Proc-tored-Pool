@@ -1,4 +1,5 @@
 {{$NEXT}}
+- Bump proc::tored to 0.15 for improvements to reliability and process safety
 
 0.06 2017-03-02
 - Bump Proc::tored to 0.12 to address test failures caused by some older

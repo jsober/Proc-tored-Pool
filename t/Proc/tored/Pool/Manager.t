@@ -1,5 +1,6 @@
-use Test2::Bundle::Extended -target => 'Proc::tored::Pool::Manager';
+use Test2::Bundle::Extended;
 use Path::Tiny;
+use Proc::tored::Pool::Manager;
 
 my $name = 'proc-tored-pool-test';
 my $dir = Path::Tiny->tempdir('temp.XXXXXX', CLEANUP => 1, EXLOCK => 0);
@@ -8,25 +9,20 @@ skip_all 'could not create writable temp directory' unless -w $dir;
 my $assignment;
 my $success;
 my $failure;
-my $mgr;
+my $mgr = Proc::tored::Pool::Manager->new(
+  name          => $name,
+  dir           => "$dir",
+  workers       => 5,
+  on_assignment => sub { $assignment = [@_] },
+  on_success    => sub { $success = [@_] },
+  on_failure    => sub { $failure = [@_] },
+);
 
 sub reset_vars {
   undef $assignment;
   undef $success;
   undef $failure;
-
-  $mgr = $CLASS->new(
-    name => $name,
-    dir => "$dir",
-    workers => 2,
-    on_assignment => sub { $assignment = [@_] },
-    on_success => sub { $success = [@_] },
-    on_failure => sub { $failure = [@_] },
-  );
-
   $mgr->clear_flags;
-
-  ok $mgr, 'manager';
   ok !$mgr->is_running, 'not running';
   is $mgr->pending, 0, 'no pending tasks';
 };
@@ -85,8 +81,6 @@ subtest 'service' => sub {
     return $i;
   });
 
-  $mgr->sync;
-
   ok !$mgr->is_running, '!is_running';
   ok $mgr->is_stopped, 'is_stopped';
   is $i, 10, 'expected work completed';
@@ -99,8 +93,6 @@ subtest 'fork/exec' => sub {
     $mgr->assign(sub { exec q{perl -e '1'} }, 'id_exec');
     return 0;
   });
-
-  $mgr->sync;
 
   ok !$mgr->is_running, '!is_running';
   is $assignment, [$mgr, 'id_exec'], 'assigned';
