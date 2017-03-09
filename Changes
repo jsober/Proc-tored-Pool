@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+0.07 2017-03-09
 - Bump proc::tored to 0.15 for improvements to reliability and process safety
 
 0.06 2017-03-02
